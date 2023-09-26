@@ -1,0 +1,12 @@
+{
+  "name": "wallet-checker",
+  "version": "1.0.0",
+  "scripts": {
+    "check": "node --experimental-modules check.js"
+  },
+  "dependencies": {
+    "@antiadmin/anticaptchaofficial": "^1.0.42",
+    "axios": "^1.4.0"
+  },
+  "type": "module"
+}
