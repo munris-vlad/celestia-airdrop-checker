@@ -1,5 +1,6 @@
 import axios from "axios"
-import { readWallets, writeLineToFile } from "./utils/common.js"
+import { readWallets, sleep, writeLineToFile } from "./utils/common.js"
+import { HttpsProxyAgent } from "https-proxy-agent"
 
 const capsolverKey = 'CAP-xxx'
 
@@ -11,7 +12,7 @@ async function solveCaptcha() {
         task: {
             "type": "RecaptchaV3TaskProxyless",
             "websiteURL": "https://genesis.celestia.org/",
-            "websiteKey": "6LdGZBonAAAAAE0mBBza18zR9usCiZo8BfHT7h24",
+            "websiteKey": "6LdapFooAAAAAD6Zv0lIfouRC5DrNHtsXK-I7elY",
             "pageAction": 'submit'
         }
     }).then(async taskResponse => {
@@ -34,22 +35,47 @@ async function solveCaptcha() {
     return token
 }
 
-async function checkWallet(wallet) {
-    let token = await solveCaptcha()
-    
-    if (token) {
-        await axios.get(`https://genesis-api.celestia.org/api/v1/airdrop/eligibility/${wallet}?recaptcha_token=${token}`)
-        .then(tiaRes => {
-            console.log(wallet, tiaRes.data.slug)
-            writeLineToFile('./eligible.txt', wallet)
-        }).catch(e => {
-            console.log(wallet, e.response.data.slug)
-        })
+async function checkWallet(wallet, proxy = null) {
+    let token
+    let done = false
+    let agent
+
+    token = await solveCaptcha()
+
+    if (proxy) {
+       agent = new HttpsProxyAgent(proxy) 
+    }
+
+    while (!done) {
+        if (token) {
+            await axios.get(`https://genesis-api.celestia.org/api/v1/airdrop/eligibility/${wallet}?recaptcha_token=${token}`, {
+                httpAgent: proxy ? agent : null
+            })
+            .then(tiaRes => {
+                console.log(wallet, tiaRes.data.slug)
+                writeLineToFile('./eligible.txt', wallet)
+                done = true
+            }).catch(async e => {
+                console.log(wallet, e.response.data.slug)
+                if (e.response.data.slug === 'not-eligible') {
+                    done = true
+                } else {
+                    console.log(wallet, 'retry')
+                    token = await solveCaptcha()
+                    await sleep(1000)
+                }
+            })
+        }
     }
 }
 
 let wallets = readWallets('./wallets.txt')
+let proxies = readWallets('./proxies.txt')
 
-for (const wallet of wallets) {
-    await checkWallet(wallet)
+for (const [index, wallet] of wallets.entries()) {
+    if (proxies.length) {
+        checkWallet(wallet, proxies[index])
+    } else {
+        checkWallet(wallet)
+    }
 }

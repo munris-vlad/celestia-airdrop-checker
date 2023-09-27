@@ -5,7 +5,7 @@
     "check": "node --experimental-modules check.js"
   },
   "dependencies": {
-    "@antiadmin/anticaptchaofficial": "^1.0.42",
+    "https-proxy-agent": "^7.0.1",
     "axios": "^1.4.0"
   },
   "type": "module"
