@@ -29,10 +29,12 @@ async function solveCaptcha() {
                     }
                 }).catch(error => {
                     console.log(error.toString())
+                    writeLineToFile('./log.txt', JSON.stringify(error))
                 })
             }
         }).catch(error => {
             console.log(error.toString())
+            writeLineToFile('./log.txt', JSON.stringify(error))
         })
     }
 
