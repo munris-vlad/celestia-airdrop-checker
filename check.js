@@ -6,31 +6,35 @@ const capsolverKey = 'CAP-xxx'
 
 async function solveCaptcha() {
     let token = ''
+    let done = false
     
-    const captchaTaskResponse = await axios.post('https://api.capsolver.com/createTask', {
-        clientKey: capsolverKey,
-        task: {
-            "type": "RecaptchaV3TaskProxyless",
-            "websiteURL": "https://genesis.celestia.org/",
-            "websiteKey": "6LdapFooAAAAAD6Zv0lIfouRC5DrNHtsXK-I7elY",
-            "pageAction": 'submit'
-        }
-    }).then(async taskResponse => {
-        while (token === '') {
-            const captchaResponse = await axios.post('https://api.capsolver.com/getTaskResult', {
-                clientKey: capsolverKey,
-                taskId: taskResponse.data.taskId
-            }).then(async res => {
-                if (res.data.status === 'ready') {
-                    token = res.data.solution.gRecaptchaResponse
-                }
-            }).catch(error => {
-                console.log(error.toString())
-            })
-        }
-    }).catch(error => {
-        console.log(error.toString())
-    })
+    while (!done) {
+        const captchaTaskResponse = await axios.post('https://api.capsolver.com/createTask', {
+            clientKey: capsolverKey,
+            task: {
+                "type": "RecaptchaV3TaskProxyless",
+                "websiteURL": "https://genesis.celestia.org/",
+                "websiteKey": "6LdapFooAAAAAD6Zv0lIfouRC5DrNHtsXK-I7elY",
+                "pageAction": 'submit'
+            }
+        }).then(async taskResponse => {
+            while (token === '') {
+                const captchaResponse = await axios.post('https://api.capsolver.com/getTaskResult', {
+                    clientKey: capsolverKey,
+                    taskId: taskResponse.data.taskId
+                }).then(async res => {
+                    if (res.data.status === 'ready') {
+                        token = res.data.solution.gRecaptchaResponse
+                        done = true
+                    }
+                }).catch(error => {
+                    console.log(error.toString())
+                })
+            }
+        }).catch(error => {
+            console.log(error.toString())
+        })
+    }
 
     return token
 }
