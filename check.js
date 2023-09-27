@@ -76,10 +76,24 @@ async function checkWallet(wallet, proxy = null) {
 let wallets = readWallets('./wallets.txt')
 let proxies = readWallets('./proxies.txt')
 
+const args = process.argv.slice(2)
+let multithread = true
+if (args[0]) {
+    multithread = false
+}
+
 for (const [index, wallet] of wallets.entries()) {
-    if (proxies.length) {
-        checkWallet(wallet, proxies[index])
+    if (multithread) {
+        if (proxies.length) {
+            checkWallet(wallet, proxies[index])
+        } else {
+            checkWallet(wallet)
+        }
     } else {
-        checkWallet(wallet)
+        if (proxies.length) {
+            await checkWallet(wallet, proxies[index])
+        } else {
+            await checkWallet(wallet)
+        }
     }
 }
