@@ -58,8 +58,13 @@ async function checkWallet(wallet, proxy = null) {
                 httpAgent: proxy ? agent : null
             })
             .then(tiaRes => {
-                console.log(wallet, tiaRes.data.slug)
-                writeLineToFile('./eligible.txt', wallet)
+                if (tiaRes.data) {
+                    console.log(wallet, tiaRes.data.slug)
+                    writeLineToFile('./eligible.txt', wallet)
+                } else {
+                    console.log('Something gone wrong, send log file to Munris')
+                    writeLineToFile('./log.txt', JSON.stringify(tiaRes))
+                }
                 done = true
             }).catch(async e => {
                 console.log(wallet, e.response.data.slug)
