@@ -14,7 +14,7 @@ async function solveCaptcha() {
             task: {
                 "type": "RecaptchaV3TaskProxyless",
                 "websiteURL": "https://genesis.celestia.org/",
-                "websiteKey": "6LdapFooAAAAAD6Zv0lIfouRC5DrNHtsXK-I7elY",
+                "websiteKey": "6Lcx3V0oAAAAAJAXMNNDvwhIZI0wnZuM7-YjIIRx",
                 "pageAction": 'submit'
             }
         }).then(async taskResponse => {
