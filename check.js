@@ -7,6 +7,11 @@ const capsolverKey = 'CAP-xxx'
 async function solveCaptcha() {
     let token = ''
     let done = false
+    let websiteKey = ''
+
+    await axios.get('https://genesis-api.celestia.org/api/v1/recaptcha/client-key').then(res => {
+        websiteKey = res.data
+    })
     
     while (!done) {
         const captchaTaskResponse = await axios.post('https://api.capsolver.com/createTask', {
@@ -14,7 +19,7 @@ async function solveCaptcha() {
             task: {
                 "type": "RecaptchaV3TaskProxyless",
                 "websiteURL": "https://genesis.celestia.org/",
-                "websiteKey": "6Lcx3V0oAAAAAJAXMNNDvwhIZI0wnZuM7-YjIIRx",
+                "websiteKey": websiteKey,
                 "pageAction": 'submit'
             }
         }).then(async taskResponse => {
